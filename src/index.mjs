@@ -1,6 +1,6 @@
 import express from 'express'
 import cors from 'cors'
-import { human, humanConfig } from './libs/human/index.mjs'
+import { faceDummy, human, humanConfig } from './libs/human/index.mjs'
 import { readFileSync } from 'fs'
 import { join } from 'path'
 
@@ -11,36 +11,54 @@ app.use(express.json())
 
 app.use(cors())
 
-app.get("/", (req, res) => {
+human.load();
+human.warmup();
+
+app.get("/", (_req, res) => {
 
     res.json({
-        message: "Hello World",
+        version: human.version,
         config: human.config
     })
 
 })
 
+
 app.post("/api/face", async (req, res) => {
 
-    // const face = req.body.face
-    // if (!face) {
-    //     return res.status(400).json({ error: { message: "No face detected" } })
-    // }
+    /**
+     * @type {import('@vladmandic/human').FaceResult[]}
+     */
+    const faceData = req.body.faces || [faceDummy]
+    if (!faceData || !faceData.length) {
+        return res.status(400).json({ error: { message: "No face detected" } })
+    }
 
-    const file = readFileSync(join(process.cwd(), "src", "assets", "face.jpeg"))
-
-    console.log("file: ", file)
-    console.log("human: ", human)
-
+    const file = readFileSync(join(process.cwd(), "src", "assets", "face.jpg"))
+    // const file = readFileSync(join(process.cwd(), "src", "assets", "face-org.png"))
 
     const tensor = human.tf.node.decodeImage(file, 3);
-    const result = await human.detect(tensor, humanConfig);
+    const result = await human.detect(tensor);
 
-    console.log("result: ", result)
+    const face = result.face[0]
 
-    return res.json({
-        message: "Face detected"
-    })
+    const data = faceData.reduce((acc, item, i) => {
+
+        const index = `Person ${i + 1}`
+        const similarity = human.match.similarity(face.embedding, item.embedding)
+
+        acc[index] = {
+            ...acc[index],
+            similarity
+        }
+
+        return acc
+    }, {})
+
+    // return res.json({
+    //     message: `Face are ${(similarity * 100).toFixed(2)}% similar`,
+    // })
+    return res.json(data)
 
 })
 
