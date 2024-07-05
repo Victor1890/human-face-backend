@@ -133,3 +133,21 @@ To use the face comparison system, follow these steps:
         "similarity": 0.59,
     },
 }
+```
+
+## Endpoints
+
+### POST /api/faces
+- **Description:** Compares two uploaded face images and returns a similarity score.
+- **Request:**
+    - **Head*ers:** Content-Type: `application/json`
+    - **Body:** One property in json-data with the key `faces`.
+- **Response:**
+    - **Status:** 200 (OK) if successful.
+    - **Body:** JSON object with similarity score.
+
+## Contributing
+Contributions are welcome! Please open an issue or submit a pull request for any improvements or bug fixes.
+
+## License
+This project is licensed under the [MIT License](/LICENSE).
