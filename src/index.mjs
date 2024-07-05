@@ -24,7 +24,7 @@ app.get("/", (_req, res) => {
 })
 
 
-app.post("/api/face", async (req, res) => {
+app.post("/api/faces", async (req, res) => {
 
     /**
      * @type {import('@vladmandic/human').FaceResult[]}
